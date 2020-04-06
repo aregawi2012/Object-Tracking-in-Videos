@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <algorithm>
 //opencv libraries
 #include <opencv2/opencv.hpp>
@@ -18,42 +19,85 @@
 
 //Header ShowManyImages
 #include "headers/ShowManyImages.hpp"
+#include "headers/AllMethods.hpp"
 
 
 //namespaces
-using namespace cv; //avoid using 'cv' to declare OpenCV functions and variables (cv::Mat or Mat)
+using namespace cv;
 using namespace std;
 
-#define MIN_WIDTH 20
-#define MIN_HEIGHT 30
+
 
 //main function
 int main(int argc, char ** argv) 
 {
 
 
-	// READ DOCUMENTS
-    if(argc<1){
-    	cout<<"NO input Video Provided";
-    	return -1;
-    }
+  // 1. Read Video
+  string path = read_video(argc, argv);
+  if(path == "-1") return -1;
 
-    VideoCapture cap ;
+  // 2. OPEN VIDEO
+  VideoCapture cap(path) ;
+  if(!cap.isOpened()) return -1;
 
-    cap.open(argv[1]);
+  Mat frame,fgmask;
+  while(true){
 
-    if(!cap.isOpened()){
-       cout<<"Unable to open Video";
-       return -1;
-    }
-    cout<<"Arrived Here";
+	  // current frame
+      cap.read(frame);
+	  if(!frame.data) return -1;
 
+       // 3. BACKGROUND SUBTRACTION
+	  background_subtraction(frame,fgmask,LEARNING_RATE,HISTORY,varTHERSHOLD);
 
-	// DO BACKGROUND SUBTRACTION
+  }
 
-	// DO TRACKING NOW
-
-
+//    if(argc<1){
+//    	cout<<"NO input Video Provided";
+//    	return -1;
+//    }
+//
+//    VideoCapture cap ;
+//
+//    cap.open(argv[1]);
+//
+//    if(!cap.isOpened()){
+//       cout<<"Unable to open Video";
+//       return -1;
+//    }
+//
+//    //CONTINUE WITH Background subtraction
+//	Ptr<BackgroundSubtractor> pMOG2 = cv::createBackgroundSubtractorMOG2();
+//	double learningrate=-1;
+//	Mat frame , fgmask;
+//
+//   while(true){
+//
+//	    cap.read(frame);
+//	    if (!frame.data)break;
+//
+//		pMOG2->apply(frame, fgmask, learningrate);
+//
+//
+//
+//		// apply  morphological opeations
+//		int morph_size = 1;
+//		Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+//		morphologyEx(fgmask, fgmask, MORPH_OPEN, element );
+//		morphologyEx(fgmask, fgmask, MORPH_CLOSE, element );
+//
+//        threshold(fgmask,fgmask,127,255,THRESH_BINARY);
+//		ShowManyImages("Faame | fmask", 2, frame, fgmask);
+//
+//
+//
+//	   if(waitKey(35) == 27) break;
+//   }
+//
+//	cap.release();
+//	destroyAllWindows();
+//	waitKey(0); // (should stop till any key is pressed .. doesn't!!!!!)
 return 0;
 }
 
