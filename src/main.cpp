@@ -20,7 +20,7 @@
 //Header ShowManyImages
 #include "headers/ShowManyImages.hpp"
 #include "headers/AllMethods.hpp"
-
+#include "headers/blobs.hpp"
 
 //namespaces
 using namespace cv;
@@ -32,7 +32,6 @@ using namespace std;
 int main(int argc, char ** argv) 
 {
 
-
   // 1. Read Video
   string path = read_video(argc, argv);
   if(path == "-1") return -1;
@@ -42,6 +41,10 @@ int main(int argc, char ** argv)
   if(!cap.isOpened()) return -1;
 
   Mat frame,fgmask;
+  vector<cvBlob> bloblist; // list for blobs
+  vector<cvBlob> filteredBloblist; // list for blobs
+
+
   while(true){
 
 	  // current frame
@@ -49,9 +52,29 @@ int main(int argc, char ** argv)
 	  if(!frame.data) return -1;
 
        // 3. BACKGROUND SUBTRACTION
-	  background_subtraction(frame,fgmask,LEARNING_RATE,HISTORY,varTHERSHOLD);
+	  fgmask =  background_subtraction(frame,LEARNING_RATE,HISTORY,varTHERSHOLD);
+
+	  // 4. MORPHOLOGCAL OPENING ..
+      fgmask = morphological_operation(fgmask ,MOR_SIZE, MOR_TYPE);
+
+      // 5. BLOB EXTRACTION
+      extractBlobs(fgmask, bloblist, CONNECTIVITY);
+
+      // 6. FILTER SMALL BLOBS
+	  removeSmallBlobs(bloblist, filteredBloblist, MIN_WIDTH, MIN_HEIGHT);
+
+      cout << "Num  blobs  now =" << filteredBloblist.size()<< endl;
+	  ShowManyImages("Show me",4, frame,paintBlobImage(frame,filteredBloblist, false), fgmask,paintBlobImage(frame,filteredBloblist, false));
+
+
+	  // NOW CALMAN FILTER
+	  if(waitKey(35) == 27) break;
+
 
   }
+  	cap.release();
+  	destroyAllWindows();
+  	waitKey(0); // (should stop till any key is pressed .. doesn't!!!!!)
 
 //    if(argc<1){
 //    	cout<<"NO input Video Provided";

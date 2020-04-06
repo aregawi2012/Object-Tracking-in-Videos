@@ -11,6 +11,8 @@
  * @input :
  * @output :
  */
+Ptr<BackgroundSubtractor> pMOG2 = cv::createBackgroundSubtractorMOG2(HISTORY , varTHERSHOLD , false);
+
 string read_video(int count, char ** value){
 
 	if(count <1){
@@ -25,19 +27,16 @@ string read_video(int count, char ** value){
 
 /*
  * Name : background_subtraction
- * @input :
- * @output :
+ * @input : frame , fgmask , learning_rate, history , varthreshold
+ * @output : fgmask
  */
-void background_subtraction(Mat frame,Mat fgmask, double learning_rage, double history, double varThreshold){
- cout<<"Background";
-}
+Mat background_subtraction(Mat frame,double learning_rate, int his, double VarThresh){
 
-/*
-* Name : morphological_operation
-* @input :
-* @output :
-*/
-void morphological_operation(){
+	Mat fgmask =Mat::zeros(frame.size(),frame.type());
+	pMOG2->apply(frame , fgmask, LEARNING_RATE);
+
+	return fgmask;
+
 
 }
 
@@ -46,7 +45,13 @@ void morphological_operation(){
 * @input :
 * @output :
 */
-void blob_extraction(){
+Mat morphological_operation(Mat fgmask , int mor_sizes , int type){
+
+	Mat element = getStructuringElement( type, Size(mor_sizes, mor_sizes ));
+	morphologyEx(fgmask, fgmask, MORPH_OPEN, element );
+	//morphologyEx(fgmask, fgmask, MORPH_CLOSE, element );
+
+	return fgmask;
 
 }
 

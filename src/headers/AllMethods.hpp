@@ -23,20 +23,21 @@ using namespace std;
 #define varTHERSHOLD 16
 
 // Params for blob extraction
-#define MIN_WIDTH 20
-#define MIN_HEIGHT 30
+#define MIN_WIDTH 10
+#define MIN_HEIGHT 10
 
 // Morphological opening
 
-#define SIZE 3;
-#define TYPE =MORPH_RECT;
+#define MOR_SIZE 3
+#define MOR_TYPE MORPH_RECT
 
 
-/*
+ /*
  * Name : read_video
  * @input :
  * @output :
  */
+
 std::string read_video(int count, char ** value);
 
 /*
@@ -44,21 +45,22 @@ std::string read_video(int count, char ** value);
  * @input :
  * @output :
  */
-void background_subtraction(Mat frame,Mat fgmask, double learning_rage, double history, double varThreshold);
+Mat background_subtraction(Mat frame, double learning_rage, int history, double varThreshold);
 
 /*
 * Name : morphological_operation
 * @input :
 * @output :
 */
-void morphological_operation();
+
+Mat morphological_operation(Mat fgmask , int mor_size , int type);
 
 /*
 * Name : morphological_operation
 * @input :
 * @output :
 */
-void blob_extraction();
+//void extractBlobs(cv::Mat fgmask, std::vector<cvBlob> &bloblist, int connectivity);
 
 /*
 * Name : morphological_operation
