@@ -13,6 +13,7 @@
 #include <sstream>
 #include <string>
 #include <algorithm>
+
 //opencv libraries
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/background_segm.hpp>
@@ -62,6 +63,10 @@ int main(int argc, char ** argv)
 
       // 6. FILTER SMALL BLOBS
 	  removeSmallBlobs(bloblist, filteredBloblist, MIN_WIDTH, MIN_HEIGHT);
+
+	  // 7. only Max blob
+	  if(filteredBloblist.size() >= 1)
+	  getCentereOfMaxBlob(filteredBloblist);
 
       cout << "Num  blobs  now =" << filteredBloblist.size()<< endl;
 	  ShowManyImages("Show me",4, frame,paintBlobImage(frame,filteredBloblist, false), fgmask,paintBlobImage(frame,filteredBloblist, false));

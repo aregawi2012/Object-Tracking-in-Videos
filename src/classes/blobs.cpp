@@ -9,6 +9,8 @@
 
 #include "../headers/blobs.hpp"
 using namespace std;
+
+
 /**
  *	Draws blobs with different rectangles on the image 'frame'. All the input arguments must be
  *  initialized when using this function.
@@ -108,21 +110,33 @@ int extractBlobs(cv::Mat fgmask, std::vector<cvBlob> &bloblist, int connectivity
 
 	 // DONE : OPTION1 .. connectedComponentsWithStats for blob extration.
      Mat box , center ;
-     int x , y , w , h ; // x , y ,width , height
+     int x , y , w , h ,cx,cy ,area ; // x , y ,width , height
      // GET CONECTED COMPONET BLOBS
      connectedComponentsWithStats(fgmask,aux,box,center,connectivity,CV_32SC1);
 
      // ADD BLOBS TO BLOB LIST , start from one to skip the first :( freaking blob.
      for (int i = 1 ; i < box.rows ; i++){
 
+
     	 // get the details of the blob
          x = box.at<int>(Point(0,i));
 		 y = box.at<int>(Point(1,i));
 		 w = box.at<int>(Point(2,i));
 		 h = box.at<int>(Point(3,i));
+         cx = center.at<double>(i,0);
+         cy = center.at<double>(i,1);
+         area = box.at<int>(i, cv::CC_STAT_AREA);
+
+
+         // sometimes the whole image is detected as blob in the beginning
+                if(h == fgmask.rows && w == fgmask.cols){
+                 cout<<"arrived here";
+                 continue;
+
+                }
 
          // create blob and add it to blob list
-         cvBlob blob = initBlob(i, x, y, w, h);
+         cvBlob blob = initBlob(i, x, y, w, h,cx,cy,area);
          bloblist.push_back(blob);
 
      }
@@ -170,6 +184,7 @@ int removeSmallBlobs(std::vector<cvBlob> bloblist_in, std::vector<cvBlob> &blobl
 
 	//clear blob list (to fill with this function)
 	bloblist_out.clear();
+
 	for(int i = 0; i < bloblist_in.size(); i++)
 	{
 		//get ith blob
@@ -186,16 +201,33 @@ int removeSmallBlobs(std::vector<cvBlob> bloblist_in, std::vector<cvBlob> &blobl
 	return 1;
 }
 
- /**
-  *	Blob classification between the available classes in 'Blob.hpp' (see CLASS typedef). All the input arguments must be
-  *  initialized when using this function.
-  *
-  * \param frame Input image
-  * \param fgmask Foreground/Background segmentation mask (1-channel binary image)
-  * \param bloblist List with found blobs
-  *
-  * \return Operation code (negative if not succesfull operation)
-  */
+
+/** ========================================================================
+ * Fuction name :  getCentereOfMaxBlob
+ * Gets the maximum blob with larger area.
+ *
+ * @param:  bloblist.
+ * @return:  cvBlob
+ * ========================================================================
+ */
+Point getCentereOfMaxBlob(std::vector<cvBlob> blobs){
+
+	   int x =0, y=0 ; // x and y parts of the point
+	   int area = 0;
+
+	   for(int i = 0 ; i< blobs.size();i++){
+
+		   if(area <=blobs[i].area){
+			   x = blobs[i].cx;
+			   y=  blobs[i].cy;
+			   area = blobs[i].area;
+		   }
+
+	   }
+	cout<<"Points ("<<x<<","<<y<<")"<<endl;
+    return Point(x,y);
+}
+
 
 
 

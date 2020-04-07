@@ -36,8 +36,6 @@ Mat background_subtraction(Mat frame,double learning_rate, int his, double VarTh
 	pMOG2->apply(frame , fgmask, LEARNING_RATE);
 
 	return fgmask;
-
-
 }
 
 /*
@@ -54,6 +52,7 @@ Mat morphological_operation(Mat fgmask , int mor_sizes , int type){
 	return fgmask;
 
 }
+
 
 /*
 * Name : morphological_operation

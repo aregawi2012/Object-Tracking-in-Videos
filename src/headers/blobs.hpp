@@ -40,26 +40,75 @@ struct cvBlob {
 	int     ID;  /* blob ID        */
 	int   x, y;  /* blob position  */
 	int   w, h;  /* blob sizes     */	
-	CLASS label; /* type of blob   */
 	int cx,cy;
+	int area ;
+	CLASS label; /* type of blob   */
 	char format[MAX_FORMAT];
 
 };
 
-inline cvBlob initBlob(int id, int x, int y, int w, int h)
+
+/** ===================================================================
+ * fuction name :  initBlob
+ * Creates blobs
+ *
+ * @param id ,x , y , w,h .
+ * @return cvBlob.
+ * ====================================================================
+ */
+
+inline cvBlob initBlob(int id, int x, int y, int w, int h, int cx , int cy,int area)
 {
-	cvBlob B = { id,x,y,w,h,UNKNOWN};
+	cvBlob B = { id,x,y,w,h,cx,cy,area,UNKNOWN};
 	return B;
 }
 
 
-//blob drawing functions
+/** ===================================================================
+ * fuction name :  paintBlobImage
+ * Paints Bounding Box  a round blobs
+ *
+ * @param: bloblist , labelled .
+ * @return: frame , if label == true , labeled box around the blobs ,
+ * 					  false , box only.
+ * ====================================================================
+ */
+
 Mat paintBlobImage(Mat frame, std::vector<cvBlob> bloblist, bool labelled);
 
-//blob extraction functions
+
+/** ========================================================================
+ * Fuction name :  extractBlobs
+ * Finds connected blobs using opencv connectedComponentsWithStatus method
+ *
+ * @param: fgmask , bloblist(empty) , connectivity .
+ * @return: bloblist ( with blobs)
+ * ========================================================================
+ */
 int extractBlobs(Mat fgmask, std::vector<cvBlob> &bloblist, int connectivity);
 
+
+
+/** ========================================================================
+ * Fuction name :  extractBlobs
+ * Finds connected blobs using opencv connectedComponentsWithStatus method
+ *
+ * @param: fgmask , bloblist(empty) , connectivity .
+ * @return: bloblist ( with blobs)
+ * ========================================================================
+ */
 int removeSmallBlobs(std::vector<cvBlob> bloblist_in, std::vector<cvBlob> &bloblist_out, int min_width, int min_height);
+
+
+/** ========================================================================
+ * Fuction name :  getCentereOfMaxBlob
+ * Gets the maximum blob with larger area.
+ *
+ * @param:  bloblist.
+ * @return:  cvBlob
+ * ========================================================================
+ */
+Point getCentereOfMaxBlob(std::vector<cvBlob> blobs);
 
 
 #endif
