@@ -13,8 +13,6 @@ using namespace cv;
 using namespace std;
 
 
-namespace kalman{
-
   class kalman{
 
 	     /**
@@ -32,12 +30,21 @@ namespace kalman{
           *  Z       -> measurement variable
           *  Z_size  ->  measurement dimension
           *
+          *
           * ================================================
 	    */
 	    Mat A, H , P, Q, R;
 	    Mat X , Z;
+	    KalmanFilter KF;
 	    int X_size , Z_size;
-	    int Kalman_type = 0 ; // This 1. for constant velocity , 2.. for constant acceleration . 0 default
+	    int Kalman_type = 0 ;   // This 1. for constant velocity , 2.. for constant acceleration . 0 default
+	    bool started = false ;    // to start Kalman
+        Point new_center;
+
+        std::vector<cv::Point> predicted_points;
+        std::vector<cv::Point> corrected_points;
+
+        string Label;
 
 	    // public setter methods
   public :
@@ -45,6 +52,7 @@ namespace kalman{
 	    // CONSTRUCTOR .. INTIALIZES EVERYTHING..
 	    // type = 1 will set up constatn velocity.
 	    // type = 2 will set up constant acceleration.
+
 	    kalman(int type);
 
 	    /**
@@ -69,14 +77,27 @@ namespace kalman{
 	    // set measurment error covariance
 	    void set_measuement_error_cov_R();
 
+	    // make prediction
+	    Point make_prediction(Point center);
+
+	    // For constatn velocity
+	    void constantVelocity(Point center);
+
+	    // For constant Acceleration
+	    void constantAcceleration(Point center);
+
+	    // history for the trajoctory
+	    void add_point_predicted(Point p);
+	    void add_point_corrected(Point p);
+
 	    /**
 		  * ===============================================
-		  *   PUBLIC GETTER METHODS
+		 *   PUBLIC GETTER METHODS
 		  * ===============================================
 		  *
 		  */
 
-		const Mat& getA() const {
+	    const Mat& getA() const {
 			return A;
 		}
 
@@ -114,9 +135,5 @@ namespace kalman{
 
 
   };
-
-}
-
-
 
 #endif /* SRC_HEADERS_KALMANFILTER_HPP_ */

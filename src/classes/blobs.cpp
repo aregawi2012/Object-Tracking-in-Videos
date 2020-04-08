@@ -224,7 +224,7 @@ Point getCentereOfMaxBlob(std::vector<cvBlob> blobs){
 		   }
 
 	   }
-	cout<<"Points ("<<x<<","<<y<<")"<<endl;
+	//cout<<"Points ("<<x<<","<<y<<")"<<endl;
     return Point(x,y);
 }
 

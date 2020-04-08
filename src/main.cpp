@@ -22,11 +22,11 @@
 #include "headers/ShowManyImages.hpp"
 #include "headers/AllMethods.hpp"
 #include "headers/blobs.hpp"
+#include "headers/KalmanFilter.hpp"
 
 //namespaces
 using namespace cv;
 using namespace std;
-
 
 
 //main function
@@ -45,12 +45,20 @@ int main(int argc, char ** argv)
   vector<cvBlob> bloblist; // list for blobs
   vector<cvBlob> filteredBloblist; // list for blobs
 
+  // kalman Tracking
+  kalman k(1);
+//  cout<<"A"<<k.getA()<<endl;
+//  cout<<"P"<<k.getP()<<endl;
+//  cout<<"Q"<<k.getQ()<<endl;
+//  cout<<"H"<<k.getH()<<endl;
+//  cout<<"R"<<k.getR()<<endl;
+
 
   while(true){
 
 	  // current frame
       cap.read(frame);
-	  if(!frame.data) return -1;
+	  if(!frame.data) break;
 
        // 3. BACKGROUND SUBTRACTION
 	  fgmask =  background_subtraction(frame,LEARNING_RATE,HISTORY,varTHERSHOLD);
@@ -65,67 +73,33 @@ int main(int argc, char ** argv)
 	  removeSmallBlobs(bloblist, filteredBloblist, MIN_WIDTH, MIN_HEIGHT);
 
 	  // 7. only Max blob
-	  if(filteredBloblist.size() >= 1)
-	  getCentereOfMaxBlob(filteredBloblist);
+	  Point center = getCentereOfMaxBlob(filteredBloblist);
 
-      cout << "Num  blobs  now =" << filteredBloblist.size()<< endl;
-	  ShowManyImages("Show me",4, frame,paintBlobImage(frame,filteredBloblist, false), fgmask,paintBlobImage(frame,filteredBloblist, false));
+	  //8. Kalman Tracking
+      Point new_center = k.make_prediction(center);
 
+      putText(frame,"+", new_center, FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255));
+      putText(frame,"-", center, FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255));
+
+     // Man i stoped here doing the trajecktory
+      // Good job and good night.
+
+
+     cout<<"New Cetner = "<<new_center<<endl;
+      ShowManyImages("Show me",2, frame,fgmask);
 
 	  // NOW CALMAN FILTER
 	  if(waitKey(35) == 27) break;
 
 
   }
+
+    cout<<"Done"<<endl;
   	cap.release();
   	destroyAllWindows();
-  	waitKey(0); // (should stop till any key is pressed .. doesn't!!!!!)
+  	waitKey(0);
 
-//    if(argc<1){
-//    	cout<<"NO input Video Provided";
-//    	return -1;
-//    }
-//
-//    VideoCapture cap ;
-//
-//    cap.open(argv[1]);
-//
-//    if(!cap.isOpened()){
-//       cout<<"Unable to open Video";
-//       return -1;
-//    }
-//
-//    //CONTINUE WITH Background subtraction
-//	Ptr<BackgroundSubtractor> pMOG2 = cv::createBackgroundSubtractorMOG2();
-//	double learningrate=-1;
-//	Mat frame , fgmask;
-//
-//   while(true){
-//
-//	    cap.read(frame);
-//	    if (!frame.data)break;
-//
-//		pMOG2->apply(frame, fgmask, learningrate);
-//
-//
-//
-//		// apply  morphological opeations
-//		int morph_size = 1;
-//		Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-//		morphologyEx(fgmask, fgmask, MORPH_OPEN, element );
-//		morphologyEx(fgmask, fgmask, MORPH_CLOSE, element );
-//
-//        threshold(fgmask,fgmask,127,255,THRESH_BINARY);
-//		ShowManyImages("Faame | fmask", 2, frame, fgmask);
-//
-//
-//
-//	   if(waitKey(35) == 27) break;
-//   }
-//
-//	cap.release();
-//	destroyAllWindows();
-//	waitKey(0); // (should stop till any key is pressed .. doesn't!!!!!)
+
 return 0;
 }
 
