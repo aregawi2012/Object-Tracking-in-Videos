@@ -5,7 +5,7 @@
  *      Author: root
  */
 
-#include "../headers/AllMethods.hpp"
+#include "../headers/SetUp.hpp"
 
  /* Name : read_video
  * @input :
@@ -52,7 +52,6 @@ Mat morphological_operation(Mat fgmask , int mor_sizes , int type){
 	return fgmask;
 
 }
-
 
 /*
 * Name : morphological_operation

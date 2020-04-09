@@ -1,10 +1,7 @@
 /* Applied Video Analysis of Sequences (AVSA)
  *
- *	LAB2: Blob detection & classification
- *	Lab2.0: Sample Opencv project
- * 
+ *	LAB3: Object Tracking in Videos
  *
- * Authors: José M. Martínez (josem.martinez@uam.es), Paula Moral (paula.moral@uam.es), Juan C. San Miguel (juancarlos.sanmiguel@uam.es)
  */
 
 //system libraries C/C++
@@ -18,9 +15,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/background_segm.hpp>
 
-//Header ShowManyImages
+//Header Files
+#include "headers/SetUp.hpp"
 #include "headers/ShowManyImages.hpp"
-#include "headers/AllMethods.hpp"
 #include "headers/blobs.hpp"
 #include "headers/KalmanFilter.hpp"
 
@@ -33,6 +30,11 @@ using namespace std;
 int main(int argc, char ** argv) 
 {
 
+  Mat frame,fgmask;
+  vector<cvBlob> bloblist; // list for blobs
+  vector<cvBlob> filteredBloblist; // list for blobs
+
+
   // 1. Read Video
   string path = read_video(argc, argv);
   if(path == "-1") return -1;
@@ -41,17 +43,9 @@ int main(int argc, char ** argv)
   VideoCapture cap(path) ;
   if(!cap.isOpened()) return -1;
 
-  Mat frame,fgmask;
-  vector<cvBlob> bloblist; // list for blobs
-  vector<cvBlob> filteredBloblist; // list for blobs
-
   // kalman Tracking
-  kalman k(1);
-//  cout<<"A"<<k.getA()<<endl;
-//  cout<<"P"<<k.getP()<<endl;
-//  cout<<"Q"<<k.getQ()<<endl;
-//  cout<<"H"<<k.getH()<<endl;
-//  cout<<"R"<<k.getR()<<endl;
+   kalman k(2);
+
 
 
   while(true){
@@ -78,23 +72,23 @@ int main(int argc, char ** argv)
 	  //8. Kalman Tracking
       Point new_center = k.make_prediction(center);
 
-      putText(frame,"+", new_center, FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255));
-      putText(frame,"-", center, FONT_HERSHEY_SIMPLEX, 2, Scalar(0,0,255));
+      //9. Draw Trajectory
+      for(int i = 0 ;i<k.getPredictedPoints().size();i++){
 
-     // Man i stoped here doing the trajecktory
-      // Good job and good night.
+    	  putText(frame,"*",k.getPredictedPoints()[i],FONT_HERSHEY_COMPLEX,0.5,Scalar(0,0,255),1);
+    	  putText(frame,"+",k.getCorrectedPoints()[i],FONT_HERSHEY_COMPLEX,0.5,Scalar(0,255,0),1);
+      }
 
+      // putText(frame,k.getLabel(),new_center,FONT_HERSHEY_COMPLEX,0.5,Scalar(0,0,255),1);
 
-     cout<<"New Cetner = "<<new_center<<endl;
-      ShowManyImages("Show me",2, frame,fgmask);
+      ShowManyImages("Frame | Fgmask | ", 4, frame, fgmask,
+      					paintBlobImage(frame, filteredBloblist, false),paintBlobImage(frame, filteredBloblist, true));
 
-	  // NOW CALMAN FILTER
 	  if(waitKey(35) == 27) break;
 
 
   }
 
-    cout<<"Done"<<endl;
   	cap.release();
   	destroyAllWindows();
   	waitKey(0);

@@ -25,9 +25,9 @@ using namespace std;
           * P = state covariance error
           * Q = process covariance noise
 
-          *  X       -> state
-          *  X_size  -> dimension of head state [ EX. X = [ x x' y y'] - dimension -- 4 .
-          *  Z       -> measurement variable
+          *  X       ->  state
+          *  X_size  ->  dimension of head state [ EX. X = [ x x' y y'] - dimension -- 4 .
+          *  Z       ->  measurement variable
           *  Z_size  ->  measurement dimension
           *
           *
@@ -43,7 +43,6 @@ using namespace std;
 
         std::vector<cv::Point> predicted_points;
         std::vector<cv::Point> corrected_points;
-
         string Label;
 
 	    // public setter methods
@@ -77,18 +76,21 @@ using namespace std;
 	    // set measurment error covariance
 	    void set_measuement_error_cov_R();
 
+	    // set all kalman filter paramenters in one
+	    void set_all_kalman_parms();
+
 	    // make prediction
 	    Point make_prediction(Point center);
 
 	    // For constatn velocity
-	    void constantVelocity(Point center);
+	    Point constantVelocity(Point center);
 
 	    // For constant Acceleration
-	    void constantAcceleration(Point center);
+	    Point constantAcceleration(Point center);
 
 	    // history for the trajoctory
-	    void add_point_predicted(Point p);
-	    void add_point_corrected(Point p);
+	    void predicted_trajectory(Point p);
+	    void corrected_trajectory(Point p);
 
 	    /**
 		  * ===============================================
@@ -133,7 +135,22 @@ using namespace std;
 				return Z_size;
 			}
 
+		std::vector<cv::Point> getCorrectedPoints() const {
+			return corrected_points;
+		}
 
-  };
+		std::vector<cv::Point> getPredictedPoints() const {
+			return predicted_points;
+		}
+
+		string getLabel() const {
+			return Label;
+		}
+
+		void setLabel(string label) {
+			Label = label;
+		}
+
+};
 
 #endif /* SRC_HEADERS_KALMANFILTER_HPP_ */

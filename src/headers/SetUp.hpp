@@ -12,8 +12,8 @@ using namespace cv;
 using namespace std;
 
 
-#ifndef SRC_HEADERS_ALLMETHODS_HPP_
-#define SRC_HEADERS_ALLMETHODS_HPP_
+#ifndef SRC_HEADERS_SETUP_HPP_
+#define SRC_HEADERS_SETUP_HPP_
 
 
 
@@ -55,19 +55,4 @@ Mat background_subtraction(Mat frame, double learning_rage, int history, double 
 
 Mat morphological_operation(Mat fgmask , int mor_size , int type);
 
-/*
-* Name : morphological_operation
-* @input :
-* @output :
-*/
-//void extractBlobs(cv::Mat fgmask, std::vector<cvBlob> &bloblist, int connectivity);
-
-/*
-* Name : morphological_operation
-* @input :
-* @output :
-*/
-void small_blobs_removal();
-
-
-#endif /* SRC_HEADERS_ALLMETHODS_HPP_ */
+#endif /* SRC_HEADERS_HEADERS_SETUP_HPP_ */
