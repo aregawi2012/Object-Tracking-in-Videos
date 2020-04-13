@@ -27,14 +27,7 @@ kalman::kalman(int type){
 
 	// intialize kalman
 	 KF.init(X_size,Z_size,0,CV_32F);
-
-    // Intialize Parameters
-	set_transition_matrix_A();
-	set_prediction_error_cov_P();
-	set_process_noise_cov_Q();
-	set_observation_matrix_H();
-	set_measuement_error_cov_R();
-	set_all_kalman_parms();
+	 set_all_kalman_parms();
 
 }
 
@@ -144,19 +137,24 @@ void kalman::set_measuement_error_cov_R(){
 
 void kalman::set_all_kalman_parms(){
 
-	    //State transition matrix
+	   //State transition matrix
+		set_transition_matrix_A();
 		A.copyTo(KF.transitionMatrix);
 
-		//Measuremt matrix
-		H.copyTo(KF.measurementMatrix);
-
-		//Prediction error covariance
-		P.copyTo(KF.errorCovPre);
-
 		//Process noise covariance
+		set_process_noise_cov_Q();
 		Q.copyTo(KF.processNoiseCov);
 
+		//Prediction error covariance
+	    set_prediction_error_cov_P();
+		P.copyTo(KF.errorCovPre);
+
+		//Measuremt matrix
+		set_observation_matrix_H();
+		H.copyTo(KF.measurementMatrix);
+
 		//Measurement Noise covariance
+		set_measuement_error_cov_R();
 		R.copyTo(KF.measurementNoiseCov);
 }
 
@@ -177,7 +175,9 @@ Point kalman::constantVelocity(Point center){
 	// START PROCESS .. BY INTIALIZING
 	if (!started) {
 
-		if (center.x != 0 || center.y != 0) {
+
+		// if there is measurement.
+		if (center.x || center.y) {
 
 			// Intitalize Measurement
 			Z.at<float>(0) = center.x;
@@ -190,17 +190,23 @@ Point kalman::constantVelocity(Point center){
 
 			// UPLDATE KALMAN STATE
 			KF.statePost = X;
+
 			new_center.x = X.at<float>(0);
 			new_center.y = X.at<float>(2);
+
             started = true;
             kalman::setLabel("Initlalized");
+        	kalman::predicted_trajectory(new_center);
+
 
 		}
+
 
 	}
 	else {
 
-		// 1. STEP 1. PREDCTION
+
+		//STEP 1. PREDCTION
 		X = KF.predict();
 
 
@@ -213,22 +219,26 @@ Point kalman::constantVelocity(Point center){
 
 			Z.at<float>(0) = center.x;
 			Z.at<float>(1) = center.y;
-
-		// 2. STEP 2 . CORRECTION
-			KF.correct(Z);
-		}
-
-		if(center.x && center.y){
-            kalman::setLabel("Predicted");
-
-		}else{
 			kalman::setLabel("Corrected");
+
+		    //STEP 2 . CORRECTION
+			KF.correct(Z);
+
 		}
+		// IF MEASURMENT IS NOT OBSERVED .. ONLY PREDICTION
+		else{
+
+			 kalman::setLabel("Predicted");
+			 Z.at<float>(0) = X.at<float>(0);
+			 Z.at<float>(1) = X.at<float>(2);
+		}
+
+		kalman::predicted_trajectory(new_center);
+
+
 	}
 
-	// add points to the trajectory
-	kalman::predicted_trajectory(new_center);
-	kalman::corrected_trajectory(center);
+
 
 	// Return new value
 	return new_center;
@@ -242,6 +252,7 @@ Point kalman::constantAcceleration(Point center){
 	// START PROCESS .. BY INTIALIZING
 	if (!started) {
 
+		// Measurment observed .. else wait
 		if (center.x != 0 || center.y != 0) {
 
 			// Intitalize Measurement
@@ -255,10 +266,16 @@ Point kalman::constantAcceleration(Point center){
 
 			// UPLDATE KALMAN STATE
 			KF.statePost = X;
+
+
 			new_center.x = X.at<float>(0);
 			new_center.y = X.at<float>(3);
+
             started = true;
             kalman::setLabel("Initlalized");
+            // add points to the trajectory
+            kalman::predicted_trajectory(new_center);
+
 
 		}
 
@@ -278,22 +295,27 @@ Point kalman::constantAcceleration(Point center){
 
 			Z.at<float>(0) = center.x;
 			Z.at<float>(1) = center.y;
+			kalman::setLabel("Corrected");
+
 
 		// 2. STEP 2 . CORRECTION
 			KF.correct(Z);
 		}
 
-		if(center.x && center.y){
-            kalman::setLabel("Predicted");
+		else{
 
-		}else{
-			kalman::setLabel("Corrected");
-		}
+			 kalman::setLabel("Predicted");
+			 Z.at<float>(0) = X.at<float>(0);
+			 Z.at<float>(1) = X.at<float>(3);
+
+		   }
+
+		// add points to the trajectory
+	     kalman::predicted_trajectory(new_center);
+
+
 	}
 
-	// add points to the trajectory
-	kalman::predicted_trajectory(new_center);
-	kalman::corrected_trajectory(center);
 
 	// Return new value
 	return new_center;
@@ -305,7 +327,33 @@ void kalman::predicted_trajectory(Point p){
 	predicted_points.push_back(p);
 }
 
-// corrected Trajecktory
-void kalman::corrected_trajectory(Point p){
-	 corrected_points.push_back(p);
+
+// draw trajectory
+void kalman::draw_trajectory(Mat &input){
+
+	// Color Selection
+
+	 Scalar color;
+
+	 for(int i = 0 ;i<getPredictedPoints().size();i++){
+
+		 cout<<getPredictedPoints().size()<<endl;
+
+		   if(kalman::getLabel()[i] == "Corrected")
+		 		color = Scalar(0,0 ,255 );
+		 	else if(kalman::getLabel()[i] == "Predicted")
+		 		color = Scalar(0,255 , 0 );
+
+		 	else
+		 		color = Scalar(0,255 , 255 );
+
+		      cv::circle(input, getPredictedPoints()[i], 6, color, -1);
+
+	    	  if(i == getPredictedPoints().size()-1){
+
+	        	  putText(input,getLabel()[i],getPredictedPoints()[i],FONT_HERSHEY_COMPLEX,0.5,color,1);
+
+	    	  }
+	      }
+
 }

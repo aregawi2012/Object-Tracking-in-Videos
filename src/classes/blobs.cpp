@@ -11,6 +11,7 @@
 using namespace std;
 
 
+
 /**
  *	Draws blobs with different rectangles on the image 'frame'. All the input arguments must be
  *  initialized when using this function.
@@ -108,59 +109,65 @@ int extractBlobs(cv::Mat fgmask, std::vector<cvBlob> &bloblist, int connectivity
 	//clear blob list (to fill with this function)
 	 bloblist.clear();
 
-	 // DONE : OPTION1 .. connectedComponentsWithStats for blob extration.
-     Mat box , center ;
-     int x , y , w , h ,cx,cy ,area ; // x , y ,width , height
-     // GET CONECTED COMPONET BLOBS
-     connectedComponentsWithStats(fgmask,aux,box,center,connectivity,CV_32SC1);
-
-     // ADD BLOBS TO BLOB LIST , start from one to skip the first :( freaking blob.
-     for (int i = 1 ; i < box.rows ; i++){
-
-
-    	 // get the details of the blob
-         x = box.at<int>(Point(0,i));
-		 y = box.at<int>(Point(1,i));
-		 w = box.at<int>(Point(2,i));
-		 h = box.at<int>(Point(3,i));
-         cx = center.at<double>(i,0);
-         cy = center.at<double>(i,1);
-         area = box.at<int>(i, cv::CC_STAT_AREA);
-
-
-         // sometimes the whole image is detected as blob in the beginning
-                if(h == fgmask.rows && w == fgmask.cols){
-                 cout<<"arrived here";
-                 continue;
-
-                }
-
-         // create blob and add it to blob list
-         cvBlob blob = initBlob(i, x, y, w, h,cx,cy,area);
-         bloblist.push_back(blob);
-
-     }
-
- //    DONE : OPTION 2 FOR floodFill ... // UNCOMENT THE FOLLOWING BLOCK FOR USING floodFill.
-//     Rect rect ;
-//     Scalar newVal = Scalar(0);
-//     int blob_id = 0;
-//     for (int i = 0; i < fgmask.cols; i++) {
-//     		for (int j = 0; j < fgmask.rows; j++) {
-//     			if (aux.at<uchar>(Point(i, j)) == 255) {
+//	 // DONE : OPTION1 .. connectedComponentsWithStats for blob extration.
+//     Mat box , center ;
+//     int x , y , w , h ,cx,cy ,area ; // x , y ,width , height
+//     // GET CONECTED COMPONET BLOBS
+//     connectedComponentsWithStats(fgmask,aux,box,center,connectivity,CV_32SC1);
 //
-//     				floodFill(aux, cv::Point(i,j), newVal, &rect,Scalar(0),Scalar(0),connectivity);
-//                    cvBlob blob = initBlob(blob_id, rect.x, rect.y, rect.width,rect.height);
+//     // ADD BLOBS TO BLOB LIST , start from one to skip the first :( freaking blob.
+//     for (int i = 1 ; i < box.rows ; i++){
 //
-//     				bloblist.push_back(blob);
-//     				blob_id += 1;
 //
-//     			}
-//       }
+//    	 // get the details of the blob
+//         x = box.at<int>(Point(0,i));
+//		 y = box.at<int>(Point(1,i));
+//		 w = box.at<int>(Point(2,i));
+//		 h = box.at<int>(Point(3,i));
+//         cx = center.at<double>(i,0);
+//         cy = center.at<double>(i,1);
+//         area = box.at<int>(i, cv::CC_STAT_AREA);
+//
+//
+//         // sometimes the whole image is detected as blob in the beginning
+//                if(h == fgmask.rows && w == fgmask.cols){
+//                 continue;
+//
+//                }
+//
+//         // create blob and add it to blob list
+//         cvBlob blob = initBlob(i, x, y, w, h,cx,cy,area);
+//         bloblist.push_back(blob);
+//
 //     }
 
-     // what do you want me to do
-	//return OK code
+    // DONE : OPTION 2 FOR floodFill ... // UNCOMENT THE FOLLOWING BLOCK FOR USING floodFill.
+     Rect rect ;
+     Scalar newVal = Scalar(0);
+     int blob_id = 0;
+     for (int i = 0; i < fgmask.cols; i++) {
+     		for (int j = 0; j < fgmask.rows; j++) {
+     			if (aux.at<uchar>(Point(i, j)) == 255) {
+
+     				floodFill(aux, cv::Point(i,j), newVal, &rect,Scalar(0),Scalar(0),connectivity);
+
+     		        double cx = rect.x + rect.width/2;
+     		        double cy = rect.y + rect.height/2;
+                    double area = rect.height*rect.height;
+
+					if(rect.height == fgmask.rows && rect.width == fgmask.cols){
+					 continue;
+
+					}
+
+     				cvBlob blob = initBlob(blob_id, rect.x, rect.y, rect.width,rect.height,cx,cy,area);
+     				bloblist.push_back(blob);
+     				blob_id += 1;
+
+     			}
+       }
+     }
+
 	return 1;
 }
 
@@ -207,24 +214,24 @@ int removeSmallBlobs(std::vector<cvBlob> bloblist_in, std::vector<cvBlob> &blobl
  * Gets the maximum blob with larger area.
  *
  * @param:  bloblist.
- * @return:  cvBlob
+ * @return:  cvBlob .. Unlikly to be found -1 , -1
  * ========================================================================
  */
+
 Point getCentereOfMaxBlob(std::vector<cvBlob> blobs){
 
 	   int x =0, y=0 ; // x and y parts of the point
 	   int area = 0;
 
-	   for(int i = 0 ; i< blobs.size();i++){
+	   for(int i = 0 ; i< blobs.size(); i++){
 
-		   if(area <=blobs[i].area){
-			   x = blobs[i].cx;
-			   y=  blobs[i].cy;
-			   area = blobs[i].area;
+		   if(area  <= blobs[i].area){
+			   x    =  blobs[i].cx;
+			   y    =  blobs[i].cy;
+			   area =  blobs[i].area;
 		   }
 
 	   }
-	//cout<<"Points ("<<x<<","<<y<<")"<<endl;
     return Point(x,y);
 }
 

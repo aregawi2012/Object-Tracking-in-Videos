@@ -35,6 +35,9 @@ Mat background_subtraction(Mat frame,double learning_rate, int his, double VarTh
 	Mat fgmask =Mat::zeros(frame.size(),frame.type());
 	pMOG2->apply(frame , fgmask, LEARNING_RATE);
 
+    // remove shadow
+    threshold(fgmask,fgmask,127,255,THRESH_BINARY);
+
 	return fgmask;
 }
 
@@ -45,7 +48,7 @@ Mat background_subtraction(Mat frame,double learning_rate, int his, double VarTh
 */
 Mat morphological_operation(Mat fgmask , int mor_sizes , int type){
 
-	Mat element = getStructuringElement( type, Size(mor_sizes, mor_sizes ));
+	Mat element = getStructuringElement( type, Size(mor_sizes, mor_sizes ),Point(1,1));
 	morphologyEx(fgmask, fgmask, MORPH_OPEN, element );
 	//morphologyEx(fgmask, fgmask, MORPH_CLOSE, element );
 
@@ -53,14 +56,7 @@ Mat morphological_operation(Mat fgmask , int mor_sizes , int type){
 
 }
 
-/*
-* Name : morphological_operation
-* @input :
-* @output :
-*/
-void small_blobs_removal(){
 
-}
 
 
 

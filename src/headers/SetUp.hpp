@@ -52,7 +52,7 @@ Mat background_subtraction(Mat frame, double learning_rage, int history, double 
 * @input :
 * @output :
 */
-
 Mat morphological_operation(Mat fgmask , int mor_size , int type);
+
 
 #endif /* SRC_HEADERS_HEADERS_SETUP_HPP_ */

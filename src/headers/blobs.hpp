@@ -28,11 +28,11 @@ const int CONNECTIVITY = 8;
 
 
 /// Type of labels for blobs
-typedef enum {	
-	UNKNOWN=0, 
-	PERSON=1, 
-	GROUP=2, 
-	CAR=3, 
+typedef enum {
+	UNKNOWN=0,
+	PERSON=1,
+	GROUP=2,
+	CAR=3,
 	OBJECT=4
 } CLASS;
 
@@ -109,6 +109,8 @@ int removeSmallBlobs(std::vector<cvBlob> bloblist_in, std::vector<cvBlob> &blobl
  * ========================================================================
  */
 Point getCentereOfMaxBlob(std::vector<cvBlob> blobs);
+
+
 
 
 #endif

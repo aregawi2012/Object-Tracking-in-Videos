@@ -42,8 +42,8 @@ using namespace std;
         Point new_center;
 
         std::vector<cv::Point> predicted_points;
-        std::vector<cv::Point> corrected_points;
-        string Label;
+
+        std::vector<std::string> Label;
 
 	    // public setter methods
   public :
@@ -90,7 +90,9 @@ using namespace std;
 
 	    // history for the trajoctory
 	    void predicted_trajectory(Point p);
-	    void corrected_trajectory(Point p);
+
+	    //  draw trajectory
+	    void draw_trajectory(Mat &input);
 
 	    /**
 		  * ===============================================
@@ -135,21 +137,19 @@ using namespace std;
 				return Z_size;
 			}
 
-		std::vector<cv::Point> getCorrectedPoints() const {
-			return corrected_points;
-		}
 
 		std::vector<cv::Point> getPredictedPoints() const {
 			return predicted_points;
 		}
 
-		string getLabel() const {
+		std::vector<std::string> getLabel() const {
 			return Label;
 		}
 
-		void setLabel(string label) {
-			Label = label;
-		}
+        void setLabel(string value){
+        	Label.push_back(value);
+        }
+
 
 };
 
