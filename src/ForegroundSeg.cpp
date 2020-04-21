@@ -28,8 +28,9 @@ Mat ForegroundSeg::background_subtraction(Mat frame,double learning_rate, int hi
 
 Mat ForegroundSeg::morphological_operation(Mat fgmask , int mor_sizes , int type){
 
-	Mat element = getStructuringElement( type, Size(3, 3 ),Point(1,1));
+	Mat element = getStructuringElement( type, Size(mor_sizes, mor_sizes ),Point(1,1));
 	morphologyEx(fgmask, fgmask, MORPH_OPEN, element );
+	//morphologyEx(fgmask, fgmask, MORPH_CLOSE, element );
 
 	return fgmask;
 
@@ -49,7 +50,7 @@ void ForegroundSeg::max_blob_extraction(Mat fgmask){
       bloblist.clear();
 
 	  Mat box , center , labels ;
-	  int x , y , w , h ,area , index ;      // x , y ,width , height - detected blobs
+	  int x, y, w, h, area, index ;      // x , y ,width , height - detected blobs
 
 	  int max_x = 0 , max_y = 0  , max_w = 0 , max_h = 0 ;    //  for max blob;
 	  double cx = 0,cy= 0 , max_cx = 0 , max_cy = 0;
@@ -83,9 +84,9 @@ void ForegroundSeg::max_blob_extraction(Mat fgmask){
 	     cy = center.at<double>(i,1);
 
 		 // only maximum blob
-		  if(max_area <= h*w){
+		  if(max_area <= area){
 
-			  max_area = h*w;
+			  max_area = area;
               max_cx = cx;
               max_cy = cy;
               max_h = h;
@@ -114,18 +115,17 @@ Mat ForegroundSeg::paintBlobImage(cv::Mat frame, std::vector<cvBlob> bloblist)
 	//check input conditions and return original if any is not satisfied
 	//...
 	frame.copyTo(blobImage);
-
 	//required variables to paint
 	//...
 
-	if(bloblist.size() && isBlobFound()){
+	if(bloblist.size()){
 
 		cvBlob blob = bloblist[bloblist.size()-1]; //get ith blob
 
 		Point p1 = Point(blob.x, blob.y);
 		Point p2 = Point(blob.x+blob.w, blob.y+blob.h);
 
-		rectangle(blobImage, p1, p2, Scalar(255, 255, 255), 1, 1, 0);
+		rectangle(blobImage, p1, p2, Scalar(51, 255, 204), 1, 1, 0);
 	}
 
 

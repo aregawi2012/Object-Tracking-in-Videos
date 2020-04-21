@@ -16,7 +16,7 @@ using namespace cv;
 using namespace std;
 
 // Parameters for MOG
-#define LEARNING_RATE -1
+#define LEARNING_RATE 0.001
 #define HISTORY 50
 #define varTHERSHOLD 16
 
@@ -93,12 +93,17 @@ class ForegroundSeg{
 		blob_found = blobFound;
 	}
 
-	void save_results(Mat input , int it){
+	void save_results(Mat input ,  string folder_name , int it , int type){
+
+		string model_type = "";
+
+		if(type == 1) model_type = "Velocity";
+		else model_type = "Acceleration";
 
 		 // create directory to store results
 		string project_root_path = "/home/aron/AVSA2020results/LAB3/"; //SET THIS DIRECTORY according to your project
-		string project_name = "Lab3.0AVSA2020"; //SET THIS DIRECTORY according to your project
-		string results_path = project_root_path+"/"+project_name+"/results2";
+		string project_name = "Lab3AVSA2020"; //SET THIS DIRECTORY according to your project
+		string results_path = project_root_path+"/"+model_type+"/"+folder_name;
 
 		// create directory to store results
 		string makedir_cmd = "mkdir -p "+project_root_path+"/"+project_name;
@@ -111,8 +116,7 @@ class ForegroundSeg{
 
 		// if (_CONSOLE_DEBUG){cout << outFile << endl;}
 		bool write_result=false;
-
-				write_result=imwrite(outFile, input);
+         write_result=imwrite(outFile, input);
 		if (!write_result) printf("ERROR: Can't save fg mask.\n");
 
 	}

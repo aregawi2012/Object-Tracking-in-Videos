@@ -251,6 +251,8 @@ void Kalman::constantAcceleration(std::vector<Point> mes , bool blob_found){
 			 Z.at<float>(0) = mes[mes.size()-1].x;
 			 Z.at<float>(1) = mes[mes.size()-1].y;
 
+			 cout<<"Observation :"<<Z<<endl;
+
 		    //Initialize state to Measument.
 			X.at<float>(0) = Z.at<float>(0);
 			X.at<float>(3) = Z.at<float>(1);
@@ -258,6 +260,12 @@ void Kalman::constantAcceleration(std::vector<Point> mes , bool blob_found){
 
            // UPDATE KALMAN to current state
 			KF.statePost = X;
+
+
+			cout<<"State = "<<X<<endl<<endl;
+            cout<<"Kalman Gain"<<KF.gain<<endl;
+            cout<<"Error covariance"<<KF.errorCovPre<<endl;
+
 
 		   // intialize and set variables
     	   Kalman::setLabel("Intialized");
@@ -312,7 +320,7 @@ void Kalman::constantAcceleration(std::vector<Point> mes , bool blob_found){
 
 
 // draw trajectory
-void Kalman::draw_trajectory(Mat &frame_traj , Mat &mes , Mat mes_track , string num , std::vector<Point> blob_centers){
+void Kalman::draw_trajectory(Mat &frame_all , Mat &frame_blobs , Mat &frame_measurment, Mat &frame_traj, string num, std::vector<Point> blob_centers){
 
 	// Color Selection
 	 Scalar color_measurment = Scalar(255,0,0);
@@ -322,49 +330,66 @@ void Kalman::draw_trajectory(Mat &frame_traj , Mat &mes , Mat mes_track , string
 
 
      // Put Text to the Measurement , Predicted/corrected imagte
-	 putText(mes_track,"Measurment",Point(20,20),FONT_HERSHEY_COMPLEX,0.5,color_measurment,1);
-     putText(mes_track,"Estimate"  ,Point(20,40),FONT_HERSHEY_COMPLEX,0.5,color_estimated,1);
-	 putText(mes_track,"Predicted" ,Point(20,60),FONT_HERSHEY_COMPLEX,0.5,color_predicted,1);
+	 putText(frame_all,"Measurment_Z",Point(20,20),FONT_HERSHEY_COMPLEX,0.5,color_measurment,1);
+     putText(frame_all,"Estimate_Xk"  ,Point(20,40),FONT_HERSHEY_COMPLEX,0.5,color_estimated,1);
+	 putText(frame_all,"Predicted_Xk" ,Point(20,60),FONT_HERSHEY_COMPLEX,0.5,color_predicted,1);
 
 
-	 putText(mes,"Measurment",Point(20,25),FONT_HERSHEY_COMPLEX,0.5,color_measurment,1);
+//	 putText(mes,"Measurment",Point(20,25),FONT_HERSHEY_COMPLEX,0.5,color_measurment,1);
+//
+//
+//	 // add frame number to all the images
+	 putText(frame_all,"Frame = "+ num,Point(frame_all.cols -120,20),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
+	 putText(frame_blobs,"Frame = "+ num,Point(frame_blobs.cols - 120,20),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
+	 putText(frame_measurment,"Frame = "+ num,Point(frame_measurment.cols - 120,20),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
+	// putText(frame_measurment,"Measurment Z",Point(20,60),FONT_HERSHEY_COMPLEX,0.4,color_measurment,1);
 
 
-	 // add frame number to all the images
-	 putText(mes,num,Point(frame_traj.cols - 20,50),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
-	 putText(mes_track,num,Point(frame_traj.cols - 20,50),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
-	 putText(frame_traj,num,Point(frame_traj.cols - 20,50),FONT_HERSHEY_COMPLEX,0.4,Scalar(255,255,255),1);
 
+	 // Put the measurement in to the measurement image
 
-	 // add detected blob centers/ measurments for visualization.
 	 for(int i = 0 ;i<blob_centers.size();i++){
 
-	      circle(mes,blob_centers[i], 4, color_measurment, -1);
-	      circle(mes_track,blob_centers[i], 4, color_measurment, -1);
+	      circle(frame_measurment,blob_centers[i], 4, color_measurment, -1);
+	      circle(frame_all,blob_centers[i], 4, color_measurment, -1);
 
 	 	 }
 
-	 // predicted and corrected lines
-	for(int i = 0 ;i<getPredictedPoints().size();i++){
+
+
+     // PLOT ESTIAMATES
+	 for(int i = 0 ;i<getPredictedPoints().size();i++){
 
 		 if(Kalman::getLabel()[i] == "Corrected")
-			 color_label = color_estimated;
-		else if(Kalman::getLabel()[i] == "Predicted")
-			color_label = color_predicted;
-		else
-			color_label = color_measurment;
+					 color_label = color_estimated;
+				else if(Kalman::getLabel()[i] == "Predicted")
+					color_label = color_predicted;
+				else
+					color_label = color_measurment;
+		 circle(frame_all,getPredictedPoints()[i], 2, color_label, -1);
 
-	    circle(mes_track,getPredictedPoints()[i], 2, color_label, -1);
 
-		if(i == Kalman::getPredictedPoints().size()-1){
+ 	   if(i!=0)
+   	     line(frame_traj ,getPredictedPoints()[i-1] , getPredictedPoints()[i],color_estimated,1);
 
-	      putText(mes_track,Kalman::getLabel()[i],getPredictedPoints()[i],FONT_HERSHEY_COMPLEX,0.5,color_label,1);
-	    }
+	 }
 
-	   if(i!=0)
-	   line(frame_traj ,getPredictedPoints()[i-1] , getPredictedPoints()[i],color_estimated,1);
 
-    }
+
+
+
+//
+//
+//
+////		if(i == Kalman::getPredictedPoints().size()-1){
+////
+////	      putText(mes_track,Kalman::getLabel()[i],getPredictedPoints()[i],FONT_HERSHEY_COMPLEX,0.5,color_label,1);
+////	    }
+////
+////	   if(i!=0)
+////	   line(frame_traj ,getPredictedPoints()[i-1] , getPredictedPoints()[i],color_estimated,1);
+//
+//    }
 
 
 

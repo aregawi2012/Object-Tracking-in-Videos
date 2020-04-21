@@ -99,7 +99,7 @@ class Kalman{
 	void predicted_trajectory(Point p);
 
 	//  draw trajectory
-	void draw_trajectory(Mat &frame_traj , Mat &frame_circles , Mat frame_text , string num,std::vector<Point> blob_centers);
+	void draw_trajectory(Mat &frame_all , Mat &frame_blobs , Mat &frame_measurment, Mat &frame_traj, string num,std::vector<Point> blob_centers);
 
     /**
 	 * ===============================================
