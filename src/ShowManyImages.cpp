@@ -187,6 +187,3 @@ imshow( title, DispImage);
 va_end(args);
 }
 
-
-
-
